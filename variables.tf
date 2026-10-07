@@ -59,9 +59,9 @@ variable "sshkeys" {
   type = list(string)
   default = null
 }
-variable "cloud_image_url" {
+variable "cloud_image_name" {
   type = string
-  default = "https://cloud.debian.org/images/cloud/trixie/latest/debian-13-generic-amd64.qcow2"
+  default = "debian-13-generic-amd64.qcow2"
 }
 variable "ip_range" {
   type = string

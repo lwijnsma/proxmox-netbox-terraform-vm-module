@@ -78,12 +78,11 @@ EOF
   }
 }
 
-resource "proxmox_download_file" "cloud_image" {
-  content_type = "import"
-  datastore_id = "local"
-  file_name    = regex("[a-zA-Z0-9-]*[.]qcow2$", var.cloud_image_url)
+data "proxmox_file" "cloud_image" {
   node_name    = var.pve_node
-  url          = var.cloud_image_url
+  datastore_id = "local"
+  content_type = "import"
+  file_name    = var.cloud_image_name
 }
 
 resource "proxmox_virtual_environment_vm" "myvm" {
@@ -106,7 +105,7 @@ resource "proxmox_virtual_environment_vm" "myvm" {
 
   disk {
     datastore_id = var.vm_datastore
-    file_id      = proxmox_download_file.cloud_image.id
+    file_id      = proxmox_file.cloud_image.id
     interface    = "virtio0"
     iothread     = true
     size         = var.vm_disk_size

@@ -18,7 +18,7 @@ module "proxmox" {
 
   vm_hostname = "test"
   vm_username = "username"
-  sshkeys = ["ssh-ed25519 <SSH_KEY>"]
+  ssh_keys = ["ssh-ed25519 <SSH_KEY>"]
   
   vm_vlan_id = "1"
   ip_range = "Netbox Ip range description"

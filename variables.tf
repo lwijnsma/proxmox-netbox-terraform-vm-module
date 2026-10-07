@@ -55,7 +55,7 @@ variable "netbox_device_role" {
   type = string
   default = "Application Server"
 }
-variable "sshkeys" {
+variable "ssh_keys" {
   type = list(string)
   default = null
 }

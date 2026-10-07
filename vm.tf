@@ -47,37 +47,6 @@ resource "netbox_primary_ip" "myvm_primary_ip" {
   virtual_machine_id = resource.netbox_virtual_machine.myvm.id
 }
 
-resource "proxmox_virtual_environment_file" "user_data" {
-  content_type = "snippets"
-  datastore_id = "local"
-  node_name    = var.pve_node
-
-  source_raw {
-    data = templatefile("${path.module}/cloud-init/user-data.tftpl", {
-      qemu_agent = var.qemu_agent,
-      vm_hostname = var.vm_hostname,
-      vm_username = var.vm_username,
-      sshkeys = var.sshkeys
-    })
-    file_name = "cloud-config-user-data-${var.vm_hostname}.yaml"
-  }
-
-}
-
-resource "proxmox_virtual_environment_file" "meta_data" {
-  content_type = "snippets"
-  datastore_id = "local"
-  node_name    = var.pve_node
-
-  source_raw {
-      data =  <<EOF
-local-hostname: ${var.vm_hostname}
-EOF
-
-      file_name = "cloud-config-meta-data-${var.vm_hostname}.yaml"
-  }
-}
-
 data "proxmox_file" "cloud_image" {
   node_name    = var.pve_node
   datastore_id = "local"
@@ -105,21 +74,23 @@ resource "proxmox_virtual_environment_vm" "myvm" {
 
   disk {
     datastore_id = var.vm_datastore
-    file_id      = proxmox_file.cloud_image.id
+    file_id      = data.proxmox_file.cloud_image.id
     interface    = "virtio0"
     iothread     = true
     size         = var.vm_disk_size
   }
 
   initialization {
+    user_account {
+          keys     = var.ssh_keys
+          username = var.vm_username
+        }
     ip_config {
         ipv4 {
           address = resource.netbox_available_ip_address.vm_ip.ip_address
           gateway = cidrhost(resource.netbox_available_ip_address.vm_ip.ip_address, 1)
       }
     }
-    user_data_file_id = proxmox_virtual_environment_file.user_data.id
-    meta_data_file_id = proxmox_virtual_environment_file.meta_data.id
   }
 
   network_device {
